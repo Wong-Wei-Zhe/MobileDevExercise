@@ -10,7 +10,6 @@ class UserCard extends StatefulWidget {
   State<UserCard> createState() => _UserCardState();
 }
 
-/// This class is to briefly show how to use Center, Padding, Column and Row widgets.
 class _UserCardState extends State<UserCard> {
   Icon account_circle_outlined = new Icon(
     const IconData(0xee35, fontFamily: 'MaterialIcons'),
