@@ -54,8 +54,10 @@ class _SignInPageState extends State<SignInPage> {
 
   // Fetch content from the json file
   Future<void> readJson() async {
-    final String response = await rootBundle.loadString('mock-data.json');
+    final String response =
+        await rootBundle.loadString('assets/mock-data.json');
     final data = await json.decode(response);
+
     final nullStr = "NA";
     setState(() {
       data.forEach((element) {
