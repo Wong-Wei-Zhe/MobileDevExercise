@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Exercise Day 3',
+      title: 'Exercise Day 5',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -47,6 +47,8 @@ class _WebSocketPageState extends State<WebSocketPage> {
   TickData tickData = TickData();
 
   bool tickStartStatus = false;
+
+  String serverTime = "NA";
 
   @override
   void initState() {
@@ -88,8 +90,14 @@ class _WebSocketPageState extends State<WebSocketPage> {
       if (decodedMessage["tick"] != null) {
         var tickDecode = decodedMessage["tick"];
         setState(() {
-          tickData = TickData(
-              tickDecode["epoch"], tickDecode["quote"], tickDecode["symbol"]);
+          tickData = TickData(_convertEpoch(tickDecode["epoch"]),
+              tickDecode["quote"], tickDecode["symbol"]);
+        });
+      }
+
+      if (decodedMessage["time"] != null) {
+        setState(() {
+          serverTime = _convertEpoch(decodedMessage["time"]);
         });
       }
       // final serverTimeAsEpoch = decodedMessage['time'];
@@ -101,12 +109,22 @@ class _WebSocketPageState extends State<WebSocketPage> {
     //_derivWebSocket.sink.add('{"time": 1}');
   }
 
+  String _convertEpoch(int timeDataEpoch) {
+    return DateTime.fromMillisecondsSinceEpoch(timeDataEpoch * 1000).toString();
+  }
+
+  void _getServerTime() {
+    _derivWebSocket.sink.add('{"time": 1}');
+  }
+
   void _getActiveSymbols() {
     _derivWebSocket.sink.add(_activeSymbolStr);
   }
 
   void _getTicksAPI(String symbolstr) {
+    _derivWebSocket.sink.add(_forgetAllStr);
     print(symbolstr);
+    symbolstr = 'R_50';
     _derivWebSocket.sink.add('{"ticks": "$symbolstr", "subscribe": 1}');
     setState(() {
       tickStartStatus = true;
@@ -115,10 +133,12 @@ class _WebSocketPageState extends State<WebSocketPage> {
 
   void _terminateTickStream() {
     _derivWebSocket.sink.add(_forgetAllStr);
-    tickStartStatus = false;
+    setState(() {
+      tickStartStatus = false;
+    });
   }
 
-  List<String> test = ["s", "s", "s"];
+  //List<String> test = ["s", "s", "s"];
 
   @override
   Widget build(BuildContext context) {
@@ -129,48 +149,73 @@ class _WebSocketPageState extends State<WebSocketPage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ElevatedButton(
-                onPressed: () {},
-                child: Text(
-                  "Connect",
-                  textScaleFactor: 1,
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Wrap(
+              spacing: 25,
+              runSpacing: 20,
+              alignment: WrapAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    _getServerTime();
+                    showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        title: const Text('Server Time'),
+                        content: Text('$serverTime'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, 'OK'),
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Text(
+                    "Show Server Time",
+                    textScaleFactor: 1,
+                  ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () {},
-                child: Text(
-                  "Disconnect",
-                  textScaleFactor: 1,
+                ElevatedButton(
+                  onPressed: () {
+                    _getActiveSymbols();
+                  },
+                  child: Text(
+                    "ActiveSymbols",
+                    textScaleFactor: 1,
+                  ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _getActiveSymbols();
-                },
-                child: Text(
-                  "ActiveSymbols",
-                  textScaleFactor: 1,
+                ElevatedButton(
+                  onPressed: () {
+                    _terminateTickStream();
+                  },
+                  child: Text(
+                    "Stop Ticks",
+                    textScaleFactor: 1,
+                  ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _terminateTickStream();
-                },
-                child: Text(
-                  "Stop Ticks",
-                  textScaleFactor: 1,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-          Container(
-              height: 20,
-              child: tickStartStatus
-                  ? Text("${tickData.price} ${tickData.name} ${tickData.epoch}")
-                  : SizedBox.shrink()),
+          tickStartStatus
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Subscribed to: ${tickData.name}",
+                      textScaleFactor: 2,
+                    ),
+                    Text(
+                      "Price: ${tickData.price}, Time: ${tickData.time}",
+                      textScaleFactor: 2,
+                      //maxLines: null,
+                    ),
+                  ],
+                )
+              : SizedBox.shrink(),
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.all(8),
@@ -180,8 +225,18 @@ class _WebSocketPageState extends State<WebSocketPage> {
                   _getTicksAPI(_activeSymbolData[index].symbol);
                 },
                 child: Container(
+                  alignment: Alignment.centerLeft,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black38),
+                      borderRadius: BorderRadius.circular(10)),
                   height: 70,
-                  child: Text("${_activeSymbolData[index].symbol}"),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: Text(
+                      "${_activeSymbolData[index].symbol}",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ),
               separatorBuilder: (BuildContext context, int index) =>
