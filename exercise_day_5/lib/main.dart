@@ -237,12 +237,26 @@ class _WebSocketPageState extends State<WebSocketPage> {
                       border: Border.all(color: Colors.black38),
                       borderRadius: BorderRadius.circular(10)),
                   height: 70,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Text(
-                      "${_activeSymbolData[index].symbol}",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 15.0, bottom: 5.0, left: 5.0),
+                        child: Text(
+                          "Symbol: ${_activeSymbolData[index].symbol}",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Text(
+                          "Market Status: ${_activeSymbolData[index].exchangeIsOpen == 1 ? "Open" : "Closed"}",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
