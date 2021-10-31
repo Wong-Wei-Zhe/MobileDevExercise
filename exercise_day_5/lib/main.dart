@@ -50,6 +50,8 @@ class _WebSocketPageState extends State<WebSocketPage> {
 
   String serverTime = "NA";
 
+  late StateSetter _setState;
+
   @override
   void initState() {
     //test();
@@ -96,7 +98,7 @@ class _WebSocketPageState extends State<WebSocketPage> {
       }
 
       if (decodedMessage["time"] != null) {
-        setState(() {
+        _setState(() {
           serverTime = _convertEpoch(decodedMessage["time"]);
         });
       }
@@ -160,18 +162,23 @@ class _WebSocketPageState extends State<WebSocketPage> {
                   onPressed: () {
                     _getServerTime();
                     showDialog<String>(
-                      context: context,
-                      builder: (BuildContext context) => AlertDialog(
-                        title: const Text('Server Time'),
-                        content: Text('$serverTime'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, 'OK'),
-                            child: const Text('Close'),
-                          ),
-                        ],
-                      ),
-                    );
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Server Time'),
+                            content: StatefulBuilder(builder:
+                                (BuildContext context, StateSetter setState) {
+                              _setState = setState;
+                              return Text('$serverTime');
+                            }), //Text('$serverTime'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, 'OK'),
+                                child: const Text('Close'),
+                              ),
+                            ],
+                          );
+                        });
                   },
                   child: Text(
                     "Show Server Time",
