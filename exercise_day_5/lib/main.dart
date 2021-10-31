@@ -126,7 +126,7 @@ class _WebSocketPageState extends State<WebSocketPage> {
   void _getTicksAPI(String symbolstr) {
     _derivWebSocket.sink.add(_forgetAllStr);
     print(symbolstr);
-    symbolstr = 'R_50';
+    //symbolstr = 'R_50';
     _derivWebSocket.sink.add('{"ticks": "$symbolstr", "subscribe": 1}');
     setState(() {
       tickStartStatus = true;
