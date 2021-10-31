@@ -3,5 +3,6 @@ class TickData {
   num price;
   String name;
 
-  TickData([this.time = "NA", this.price = 0, this.name = "NA"]);
+  TickData(
+      [this.time = "Loading...", this.price = 0, this.name = "Loading..."]);
 }
