@@ -123,14 +123,23 @@ class _WebSocketPageState extends State<WebSocketPage> {
     _derivWebSocket.sink.add(_activeSymbolStr);
   }
 
-  void _getTicksAPI(String symbolstr) {
+  void _getTicksAPI(String symbolstr, int marketStatus) {
     _derivWebSocket.sink.add(_forgetAllStr);
+    setState(() {
+      tickData = TickData();
+    });
     print(symbolstr);
     //symbolstr = 'R_50';
-    _derivWebSocket.sink.add('{"ticks": "$symbolstr", "subscribe": 1}');
-    setState(() {
-      tickStartStatus = true;
-    });
+    if (marketStatus == 1) {
+      _derivWebSocket.sink.add('{"ticks": "$symbolstr", "subscribe": 1}');
+      setState(() {
+        tickStartStatus = true;
+      });
+    } else {
+      setState(() {
+        tickStartStatus = false;
+      });
+    }
   }
 
   void _terminateTickStream() {
@@ -229,7 +238,8 @@ class _WebSocketPageState extends State<WebSocketPage> {
               itemCount: _activeSymbolData.length,
               itemBuilder: (BuildContext context, int index) => InkWell(
                 onTap: () {
-                  _getTicksAPI(_activeSymbolData[index].symbol);
+                  _getTicksAPI(_activeSymbolData[index].symbol,
+                      _activeSymbolData[index].exchangeIsOpen);
                 },
                 child: Container(
                   alignment: Alignment.centerLeft,
