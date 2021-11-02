@@ -98,9 +98,9 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(left: 30, right: 30),
-              child: Flexible(
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15),
                 child: TextFormField(
                   controller: _userInput,
                   decoration: const InputDecoration(
