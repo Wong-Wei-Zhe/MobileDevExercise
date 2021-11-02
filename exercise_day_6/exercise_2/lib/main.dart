@@ -1,4 +1,8 @@
+import 'dart:html';
+
+import 'package:exercise_2/bloc/capitalizerbloc_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   runApp(MyApp());
@@ -22,7 +26,10 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: BlocProvider(
+        create: (context) => CapitalizerblocBloc(),
+        child: MyHomePage(title: 'Flutter Demo Home Page'),
+      ),
     );
   }
 }
@@ -46,21 +53,21 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  final _userInput = TextEditingController();
+  late final capitalBloc;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void initState() {
+    _userInput.addListener(_capitalFunc);
+    super.initState();
+  }
+
+  void _capitalFunc() {
+    capitalBloc.add(Capitalize(_userInput.text, EventStatus.CAPITALIZE));
   }
 
   @override
   Widget build(BuildContext context) {
+    capitalBloc = BlocProvider.of<CapitalizerblocBloc>(context);
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -93,21 +100,35 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            Padding(
+              padding: const EdgeInsets.only(left: 30, right: 30),
+              child: Flexible(
+                child: TextFormField(
+                  controller: _userInput,
+                  decoration: const InputDecoration(
+                      border: UnderlineInputBorder(), labelText: 'Input Text'),
+                ),
+              ),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            BlocBuilder<CapitalizerblocBloc, String>(
+              builder: (context, state) {
+                return Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Text(
+                    '$state',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                );
+              },
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: ,
+      //   tooltip: 'Increment',
+      //   child: Icon(Icons.add),
+      // ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
